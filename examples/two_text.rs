@@ -10,7 +10,7 @@ use embedded_graphics_simulator::{
     BinaryColorTheme, OutputSettingsBuilder, SimulatorDisplay, Window,
 };
 
-use simple_layout::{expand, horizontal_layout, Layoutable};
+use simple_layout::prelude::{expand, horizontal_layout, Layoutable};
 
 fn main() -> Result<(), core::convert::Infallible> {
     let mut display = SimulatorDisplay::<BinaryColor>::new(Size::new(64, 128));
