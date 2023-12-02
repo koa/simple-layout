@@ -31,7 +31,7 @@ impl<'a, S: TextRenderer<Color = Color>, Color: PixelColor> Layoutable<Color> fo
             }
             total_height += bbox.size.height;
         }
-        ComponentSize::fixed_size(max_line_length, total_height)
+        ComponentSize::fixed_size(max_line_length + 1, total_height)
     }
 
     fn draw_placed<DrawError>(

@@ -8,14 +8,16 @@ mod border;
 mod expand;
 mod layoutable;
 mod linear;
+mod padding;
 
 pub mod prelude {
     pub use crate::{
         align::center,
-        border::Bordered,
-        expand::expand,
+        border::{bordered, DashedLine, RoundedLine},
+        expand::{expand, expand_horizontal, expand_vertical},
         layoutable::Layoutable,
         linear::{horizontal_layout, vertical_layout},
+        padding::padding,
     };
 }
 
@@ -43,6 +45,27 @@ where
             preferred_value: self.preferred_value + rhs.clone(),
             min_value: self.min_value + rhs.clone(),
             max_value: self.max_value + rhs,
+        }
+    }
+}
+impl Add<i32> for ValueRange<Saturating<u32>> {
+    type Output = ValueRange<Saturating<u32>>;
+
+    fn add(self, rhs: i32) -> Self::Output {
+        if rhs.is_negative() {
+            let offset = Saturating(-rhs as u32);
+            ValueRange {
+                preferred_value: self.preferred_value - offset,
+                min_value: self.min_value - offset,
+                max_value: self.max_value - offset,
+            }
+        } else {
+            let offset = Saturating(rhs as u32);
+            ValueRange {
+                preferred_value: self.preferred_value + offset,
+                min_value: self.min_value + offset,
+                max_value: self.max_value + offset,
+            }
         }
     }
 }
