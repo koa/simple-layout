@@ -23,7 +23,14 @@ fn main() -> Result<(), core::convert::Infallible> {
     let rectangle = display.bounding_box();
     let pressure_string = "Footer\nXYq";
     vertical_layout(
-        expand(Bordered::new(center(clock_text), 0, 1, BinaryColor::On)),
+        expand(Bordered::new(
+            center(clock_text),
+            0,
+            1,
+            BinaryColor::On,
+            2,
+            2,
+        )),
         1,
     )
     .append(

@@ -1,3 +1,4 @@
+use std::num::Saturating;
 use std::ops::{Add, AddAssign, Range, Sub};
 
 mod draw;
@@ -20,8 +21,8 @@ pub mod prelude {
 
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug, Default)]
 pub struct ComponentSize {
-    width: ValueRange<u32>,
-    height: ValueRange<u32>,
+    width: ValueRange<Saturating<u32>>,
+    height: ValueRange<Saturating<u32>>,
 }
 
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug, Default)]
@@ -92,12 +93,12 @@ impl<V: Clone> ValueRange<V> {
     }
 }
 
-impl ValueRange<u32> {
+impl ValueRange<Saturating<u32>> {
     fn expand_max(&self) -> Self {
         Self {
             preferred_value: self.preferred_value,
             min_value: self.min_value,
-            max_value: u32::MAX,
+            max_value: Saturating(u32::MAX),
         }
     }
 }
@@ -105,8 +106,8 @@ impl ValueRange<u32> {
 impl ComponentSize {
     pub fn fixed_size(width: u32, height: u32) -> ComponentSize {
         ComponentSize {
-            width: ValueRange::fixed(width),
-            height: ValueRange::fixed(height),
+            width: ValueRange::fixed(Saturating(width)),
+            height: ValueRange::fixed(Saturating(height)),
         }
     }
     pub fn new(
@@ -117,14 +118,14 @@ impl ComponentSize {
     ) -> Self {
         Self {
             width: ValueRange {
-                preferred_value: preferred_width,
-                min_value: width_range.start,
-                max_value: width_range.end,
+                preferred_value: Saturating(preferred_width),
+                min_value: Saturating(width_range.start),
+                max_value: Saturating(width_range.end),
             },
             height: ValueRange {
-                preferred_value: preferred_height,
-                min_value: height_range.start,
-                max_value: height_range.end,
+                preferred_value: Saturating(preferred_height),
+                min_value: Saturating(height_range.start),
+                max_value: Saturating(height_range.end),
             },
         }
     }

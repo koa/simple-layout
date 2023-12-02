@@ -1,3 +1,4 @@
+use std::num::Saturating;
 use std::{cmp::Ordering, marker::PhantomData, ops::Deref};
 
 use embedded_graphics::{
@@ -9,35 +10,45 @@ use embedded_graphics::{
 use crate::{layoutable::Layoutable, ComponentSize, ValueRange};
 
 pub trait Orientation {
-    fn split_component_size(size: ComponentSize) -> (ValueRange<u32>, ValueRange<u32>);
-    fn split_size(size: Size) -> (u32, u32);
-    fn split_point(p: Point) -> (i32, i32);
-    fn create_component_size(along: ValueRange<u32>, cross: ValueRange<u32>) -> ComponentSize;
-    fn create_size(along: u32, across: u32) -> Size;
-    fn create_point(along: i32, cross: i32) -> Point;
+    fn split_component_size(
+        size: ComponentSize,
+    ) -> (ValueRange<Saturating<u32>>, ValueRange<Saturating<u32>>);
+    fn split_size(size: Size) -> (Saturating<u32>, Saturating<u32>);
+    fn split_point(p: Point) -> (Saturating<i32>, Saturating<i32>);
+    fn create_component_size(
+        along: ValueRange<Saturating<u32>>,
+        cross: ValueRange<Saturating<u32>>,
+    ) -> ComponentSize;
+    fn create_size(along: Saturating<u32>, across: Saturating<u32>) -> Size;
+    fn create_point(along: Saturating<i32>, cross: Saturating<i32>) -> Point;
 }
 
 pub struct Horizontal {}
 
 impl Orientation for Horizontal {
     #[inline]
-    fn split_component_size(size: ComponentSize) -> (ValueRange<u32>, ValueRange<u32>) {
+    fn split_component_size(
+        size: ComponentSize,
+    ) -> (ValueRange<Saturating<u32>>, ValueRange<Saturating<u32>>) {
         (size.width, size.height)
     }
 
     #[inline]
-    fn split_size(size: Size) -> (u32, u32) {
-        (size.width, size.height)
+    fn split_size(size: Size) -> (Saturating<u32>, Saturating<u32>) {
+        (Saturating(size.width), Saturating(size.height))
     }
 
     #[inline]
-    fn split_point(p: Point) -> (i32, i32) {
+    fn split_point(p: Point) -> (Saturating<i32>, Saturating<i32>) {
         let Point { x, y } = p;
-        (x, y)
+        (Saturating(x), Saturating(y))
     }
 
     #[inline]
-    fn create_component_size(along: ValueRange<u32>, cross: ValueRange<u32>) -> ComponentSize {
+    fn create_component_size(
+        along: ValueRange<Saturating<u32>>,
+        cross: ValueRange<Saturating<u32>>,
+    ) -> ComponentSize {
         ComponentSize {
             width: along,
             height: cross,
@@ -45,50 +56,61 @@ impl Orientation for Horizontal {
     }
 
     #[inline]
-    fn create_size(along: u32, across: u32) -> Size {
+    fn create_size(along: Saturating<u32>, across: Saturating<u32>) -> Size {
         Size {
-            width: along,
-            height: across,
+            width: along.0,
+            height: across.0,
         }
     }
 
     #[inline]
-    fn create_point(along: i32, cross: i32) -> Point {
-        Point { x: along, y: cross }
+    fn create_point(along: Saturating<i32>, cross: Saturating<i32>) -> Point {
+        Point {
+            x: along.0,
+            y: cross.0,
+        }
     }
 }
 
 pub struct Vertical {}
 
 impl Orientation for Vertical {
-    fn split_component_size(size: ComponentSize) -> (ValueRange<u32>, ValueRange<u32>) {
+    fn split_component_size(
+        size: ComponentSize,
+    ) -> (ValueRange<Saturating<u32>>, ValueRange<Saturating<u32>>) {
         (size.height, size.width)
     }
 
-    fn split_size(size: Size) -> (u32, u32) {
-        (size.height, size.width)
+    fn split_size(size: Size) -> (Saturating<u32>, Saturating<u32>) {
+        (Saturating(size.height), Saturating(size.width))
     }
 
-    fn split_point(p: Point) -> (i32, i32) {
-        (p.y, p.x)
+    fn split_point(p: Point) -> (Saturating<i32>, Saturating<i32>) {
+        (Saturating(p.y), Saturating(p.x))
     }
 
-    fn create_component_size(along: ValueRange<u32>, cross: ValueRange<u32>) -> ComponentSize {
+    fn create_component_size(
+        along: ValueRange<Saturating<u32>>,
+        cross: ValueRange<Saturating<u32>>,
+    ) -> ComponentSize {
         ComponentSize {
             width: cross,
             height: along,
         }
     }
 
-    fn create_size(along: u32, across: u32) -> Size {
+    fn create_size(along: Saturating<u32>, across: Saturating<u32>) -> Size {
         Size {
-            width: across,
-            height: along,
+            width: across.0,
+            height: along.0,
         }
     }
 
-    fn create_point(along: i32, cross: i32) -> Point {
-        Point { x: cross, y: along }
+    fn create_point(along: Saturating<i32>, cross: Saturating<i32>) -> Point {
+        Point {
+            x: cross.0,
+            y: along.0,
+        }
     }
 }
 
@@ -222,19 +244,20 @@ impl<C: PixelColor, O: Orientation, LL: LinearLayout<C, O>> Layoutable<C>
             .map(|s| O::split_component_size(*s).0)
             .collect::<Box<_>>();
         let preferred_sizes = sizes.iter().map(|s| s.preferred_value).collect::<Box<_>>();
-        let total_preferred: u32 = preferred_sizes.iter().sum();
+        let total_preferred: Saturating<u32> =
+            preferred_sizes.iter().fold(Saturating(0), |s, v| s + v);
         let places = match along_target.cmp(&total_preferred) {
             Ordering::Less => {
                 let min_sizes = sizes.iter().map(|s| s.min_value).collect::<Box<_>>();
-                let total_min = min_sizes.iter().map(|v| *v as u64).sum::<u64>();
-                if total_min >= along_target as u64 {
+                let total_min = min_sizes.iter().fold(Saturating(0), |s, v| s + v);
+                if total_min >= along_target {
                     min_sizes
                 } else {
                     let mut remaining_budget = total_preferred - along_target;
                     let mut result_sizes = preferred_sizes;
                     let mut weights = vec![0; LL::len()].into_boxed_slice();
                     self.0.fill_weights(&mut weights);
-                    while remaining_budget > 0 {
+                    while remaining_budget > Saturating(0) {
                         let remaining_budget_before = remaining_budget;
                         let mut entries_with_headroom = weights
                             .iter()
@@ -252,8 +275,8 @@ impl<C: PixelColor, O: Orientation, LL: LinearLayout<C, O>> Layoutable<C>
                             break;
                         }
                         for ((weight, result_size), size) in entries_with_headroom.iter_mut() {
-                            let theoretical_decrease =
-                                remaining_budget * *weight / remaining_weights;
+                            let theoretical_decrease = remaining_budget * Saturating(**weight)
+                                / Saturating(remaining_weights);
                             let selected_decrease =
                                 (theoretical_decrease).min(**result_size - size.min_value);
                             **result_size -= selected_decrease;
@@ -271,15 +294,15 @@ impl<C: PixelColor, O: Orientation, LL: LinearLayout<C, O>> Layoutable<C>
             Ordering::Equal => preferred_sizes,
             Ordering::Greater => {
                 let max_sizes = sizes.iter().map(|s| s.max_value).collect::<Box<_>>();
-                let total_max = max_sizes.iter().map(|v| *v as u64).sum::<u64>();
-                if total_max <= along_target as u64 {
+                let total_max = max_sizes.iter().fold(Saturating(0), |s, v| s + v);
+                if total_max <= along_target {
                     max_sizes
                 } else {
                     let mut remaining_budget = along_target - total_preferred;
                     let mut result_sizes = preferred_sizes;
                     let mut weights = vec![0; LL::len()].into_boxed_slice();
                     self.0.fill_weights(&mut weights);
-                    while remaining_budget > 0 {
+                    while remaining_budget > Saturating(0) {
                         let remaining_budget_before = remaining_budget;
                         let mut entries_with_headroom = weights
                             .iter()
@@ -298,8 +321,8 @@ impl<C: PixelColor, O: Orientation, LL: LinearLayout<C, O>> Layoutable<C>
                         }
 
                         for ((weight, result_size), size) in entries_with_headroom.iter_mut() {
-                            let theoretical_increase =
-                                remaining_budget * *weight / remaining_weights;
+                            let theoretical_increase = remaining_budget * Saturating(**weight)
+                                / Saturating(remaining_weights);
                             let selected_increase =
                                 (theoretical_increase).min(size.max_value - **result_size);
                             **result_size += selected_increase;
@@ -321,7 +344,7 @@ impl<C: PixelColor, O: Orientation, LL: LinearLayout<C, O>> Layoutable<C>
                 top_left: O::create_point(along_offset, cross_offset),
                 size: O::create_size(*l, cross_target),
             };
-            along_offset += *l as i32;
+            along_offset += Saturating(l.0 as i32);
             place
         })
         .collect::<Box<_>>();

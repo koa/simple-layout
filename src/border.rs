@@ -2,6 +2,7 @@ use embedded_graphics::{
     draw_target::DrawTarget, geometry::Point, pixelcolor::PixelColor, prelude::Size,
     primitives::Rectangle, Pixel,
 };
+use std::num::Saturating;
 
 use crate::{layoutable::Layoutable, ComponentSize};
 
@@ -37,7 +38,7 @@ impl<L: Layoutable<C>, C: PixelColor> Bordered<L, C> {
 impl<L: Layoutable<C>, C: PixelColor> Layoutable<C> for Bordered<L, C> {
     fn size(&self) -> ComponentSize {
         let inner_size = self.layoutable.size();
-        let offset = (self.outer_margin + self.inner_padding + 1) * 2;
+        let offset = Saturating((self.outer_margin + self.inner_padding + 1) * 2);
         ComponentSize {
             width: inner_size.width + offset,
             height: inner_size.height + offset,

@@ -1,4 +1,5 @@
 use std::marker::PhantomData;
+use std::num::Saturating;
 
 use embedded_graphics::{
     draw_target::DrawTarget, geometry::Point, pixelcolor::PixelColor, prelude::Size,
@@ -36,7 +37,10 @@ pub fn south<L: Layoutable<C>, C: PixelColor>(
 }
 
 trait Alignment {
-    fn place(available_range: u32, target_range: ValueRange<u32>) -> (i32, u32);
+    fn place(
+        available_range: Saturating<u32>,
+        target_range: ValueRange<Saturating<u32>>,
+    ) -> (Saturating<i32>, Saturating<u32>);
 }
 
 pub struct AlignLayout<L: Layoutable<C>, C: PixelColor, VA: Alignment, HA: Alignment> {
@@ -65,8 +69,8 @@ impl<L: Layoutable<C>, C: PixelColor, VA: Alignment, HA: Alignment> AlignLayout<
         } = available_area.size;
         let ComponentSize { width, height } = component_size;
         let origin = available_area.top_left;
-        let (x, width) = HA::place(available_width, width);
-        let (y, height) = VA::place(available_height, height);
+        let (Saturating(x), Saturating(width)) = HA::place(Saturating(available_width), width);
+        let (Saturating(y), Saturating(height)) = VA::place(Saturating(available_height), height);
         Rectangle {
             top_left: origin + Point { x, y },
             size: Size { width, height },
@@ -97,19 +101,24 @@ pub struct CenteredAlignment;
 
 impl Alignment for CenteredAlignment {
     #[inline]
-    fn place(available_range: u32, target_range: ValueRange<u32>) -> (i32, u32) {
+    fn place(
+        available_range: Saturating<u32>,
+        target_range: ValueRange<Saturating<u32>>,
+    ) -> (Saturating<i32>, Saturating<u32>) {
         if target_range.max_value < available_range {
             (
-                ((available_range - target_range.max_value) / 2) as i32,
+                Saturating((available_range - target_range.max_value).0 as i32 / 2),
                 target_range.max_value,
             )
         } else if target_range.min_value > available_range {
             (
-                ((available_range as i32 - target_range.min_value as i32) / 2),
+                (Saturating(available_range.0 as i32)
+                    - Saturating(target_range.min_value.0 as i32))
+                    / Saturating(2),
                 target_range.min_value,
             )
         } else {
-            (0, available_range)
+            (Saturating(0), available_range)
         }
     }
 }
@@ -118,13 +127,16 @@ pub struct StartAlignment;
 
 impl Alignment for StartAlignment {
     #[inline]
-    fn place(available_range: u32, target_range: ValueRange<u32>) -> (i32, u32) {
+    fn place(
+        available_range: Saturating<u32>,
+        target_range: ValueRange<Saturating<u32>>,
+    ) -> (Saturating<i32>, Saturating<u32>) {
         if target_range.max_value < available_range {
-            (0, target_range.max_value)
+            (Saturating(0), target_range.max_value)
         } else if target_range.min_value > available_range {
-            (0, target_range.min_value)
+            (Saturating(0), target_range.min_value)
         } else {
-            (0, available_range)
+            (Saturating(0), available_range)
         }
     }
 }
@@ -133,19 +145,22 @@ pub struct EndAlignment;
 
 impl Alignment for EndAlignment {
     #[inline]
-    fn place(available_range: u32, target_range: ValueRange<u32>) -> (i32, u32) {
+    fn place(
+        available_range: Saturating<u32>,
+        target_range: ValueRange<Saturating<u32>>,
+    ) -> (Saturating<i32>, Saturating<u32>) {
         if target_range.max_value < available_range {
             (
-                available_range as i32 - target_range.max_value as i32,
+                Saturating(available_range.0 as i32) - Saturating(target_range.max_value.0 as i32),
                 target_range.max_value,
             )
         } else if target_range.min_value > available_range {
             (
-                available_range as i32 - target_range.min_value as i32,
+                Saturating(available_range.0 as i32) - Saturating(target_range.min_value.0 as i32),
                 target_range.min_value,
             )
         } else {
-            (0, available_range)
+            (Saturating(0), available_range)
         }
     }
 }
