@@ -19,22 +19,16 @@ pub trait Decorator<C: PixelColor> {
 
 struct Bordered<L: Layoutable<C>, C: PixelColor, D: Decorator<C>> {
     layoutable: L,
-    outer_margin: u32,
-    inner_padding: u32,
     decorator: D,
     p: PhantomData<C>,
 }
 
 pub fn bordered<L: Layoutable<C>, C: PixelColor, D: Decorator<C>>(
     layoutable: L,
-    outer_margin: u32,
-    inner_padding: u32,
     decorator: D,
 ) -> impl Layoutable<C> {
     Bordered {
         layoutable,
-        outer_margin,
-        inner_padding,
         decorator,
         p: PhantomData,
     }
@@ -42,11 +36,11 @@ pub fn bordered<L: Layoutable<C>, C: PixelColor, D: Decorator<C>>(
 
 impl<L: Layoutable<C>, C: PixelColor, D: Decorator<C>> Layoutable<C> for Bordered<L, C, D> {
     fn size(&self) -> ComponentSize {
-        let inner_size = self.layoutable.size();
-        let offset = Saturating((self.outer_margin + self.inner_padding + 1) * 2);
+        let ComponentSize { width, height } = self.layoutable.size();
+        let offset = Saturating(self.decorator.width() * 2);
         ComponentSize {
-            width: inner_size.width + offset,
-            height: inner_size.height + offset,
+            width: width + offset,
+            height: height + offset,
         }
     }
 
@@ -55,34 +49,22 @@ impl<L: Layoutable<C>, C: PixelColor, D: Decorator<C>> Layoutable<C> for Bordere
         target: &mut impl DrawTarget<Color = C, Error = DrawError>,
         position: Rectangle,
     ) -> Result<Point, DrawError> {
-        let offset = self.outer_margin + self.inner_padding + self.decorator.width();
+        let border = self.decorator.width();
         let Rectangle {
             top_left: Point { x, y },
             size: Size { width, height },
         } = position;
         let inner_position = Rectangle {
             top_left: Point {
-                x: x + offset as i32,
-                y: y + offset as i32,
+                x: x + border as i32,
+                y: y + border as i32,
             },
             size: Size {
-                width: width - 2 * offset,
-                height: height - 2 * offset,
+                width: width - 2 * border,
+                height: height - 2 * border,
             },
         };
-        self.decorator.draw_placed(
-            target,
-            Rectangle {
-                top_left: Point {
-                    x: x + self.outer_margin as i32,
-                    y: y + self.outer_margin as i32,
-                },
-                size: Size {
-                    width: width - 2 * self.outer_margin - 1,
-                    height: height - 2 * self.outer_margin - 1,
-                },
-            },
-        )?;
+        self.decorator.draw_placed(target, position)?;
         self.layoutable.draw_placed(target, inner_position)
     }
 }
@@ -115,8 +97,8 @@ impl<C: PixelColor> Decorator<C> for DashedLine<C> {
         let sequence_length = self.dot_count + self.gap_count;
         let Point { x: sx, y: sy } = position.top_left;
         let Size { width, height } = position.size;
-        let ex = sx + width as i32;
-        let ey = sy + height as i32;
+        let ex = sx + width as i32 - 1;
+        let ey = sy + height as i32 - 1;
         target.draw_iter(
             (sx..ex)
                 .map(|x| Pixel(Point { x, y: sy }, self.color))
@@ -160,8 +142,8 @@ impl<C: PixelColor> Decorator<C> for RoundedLine<C> {
     ) -> Result<(), DrawError> {
         let Point { x: sx, y: sy } = position.top_left;
         let Size { width, height } = position.size;
-        let ex = sx + width as i32;
-        let ey = sy + height as i32;
+        let ex = sx + width as i32 - 1;
+        let ey = sy + height as i32 - 1;
         target.draw_iter(
             (sx + 2..ex - 1)
                 .map(|x| Pixel(Point { x, y: sy }, self.color))

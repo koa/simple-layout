@@ -27,8 +27,6 @@ fn main() -> Result<(), core::convert::Infallible> {
     vertical_layout(
         expand(bordered(
             center(clock_text),
-            0,
-            1,
             DashedLine::new(2, 2, BinaryColor::On),
         )),
         1,
@@ -36,17 +34,13 @@ fn main() -> Result<(), core::convert::Infallible> {
     .append(
         expand(bordered(
             center(Text::new(pressure_string, Point::zero(), text_style)),
-            0,
-            1,
             RoundedLine::new(BinaryColor::On),
         )),
         2,
     )
     .append(
         center(bordered(
-            padding(Text::new("+", Point::zero(), text_style), -2, 0, 0, 0),
-            0,
-            1,
+            padding(Text::new("+", Point::zero(), text_style), -1, 0, -1, 0),
             RoundedLine::new(BinaryColor::On),
         )),
         0,
