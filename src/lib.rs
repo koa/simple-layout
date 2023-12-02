@@ -1,17 +1,17 @@
-use std::ops::{AddAssign, Range};
-
-use embedded_graphics::{
-    geometry::Dimensions, pixelcolor::PixelColor, prelude::DrawTarget, text::renderer::TextRenderer,
-};
+use std::ops::{Add, AddAssign, Range, Sub};
 
 mod draw;
 
+mod align;
+mod border;
 mod expand;
 mod layoutable;
 mod linear;
 
 pub mod prelude {
     pub use crate::{
+        align::center,
+        border::Bordered,
         expand::expand,
         layoutable::Layoutable,
         linear::{horizontal_layout, vertical_layout},
@@ -29,6 +29,35 @@ pub struct ValueRange<V> {
     preferred_value: V,
     min_value: V,
     max_value: V,
+}
+
+impl<V> Add<V> for ValueRange<V>
+where
+    V: Add<V, Output = V> + Clone,
+{
+    type Output = ValueRange<V>;
+
+    fn add(self, rhs: V) -> Self::Output {
+        ValueRange {
+            preferred_value: self.preferred_value + rhs.clone(),
+            min_value: self.min_value + rhs.clone(),
+            max_value: self.max_value + rhs,
+        }
+    }
+}
+impl<V> Sub<V> for ValueRange<V>
+where
+    V: Sub<V, Output = V> + Clone,
+{
+    type Output = ValueRange<V>;
+
+    fn sub(self, rhs: V) -> Self::Output {
+        ValueRange {
+            preferred_value: self.preferred_value - rhs.clone(),
+            min_value: self.min_value - rhs.clone(),
+            max_value: self.max_value - rhs,
+        }
+    }
 }
 
 impl<V: PartialOrd + Clone> ValueRange<V> {

@@ -10,7 +10,7 @@ use embedded_graphics_simulator::{
     BinaryColorTheme, OutputSettingsBuilder, SimulatorDisplay, Window,
 };
 
-use simple_layout::prelude::{expand, horizontal_layout, Layoutable};
+use simple_layout::prelude::{center, expand, vertical_layout, Bordered, Layoutable};
 
 fn main() -> Result<(), core::convert::Infallible> {
     let mut display = SimulatorDisplay::<BinaryColor>::new(Size::new(64, 128));
@@ -22,12 +22,19 @@ fn main() -> Result<(), core::convert::Infallible> {
 
     let rectangle = display.bounding_box();
     let pressure_string = "Footer\nXYq";
-    horizontal_layout(expand(clock_text), 1)
-        .append(
-            expand(Text::new(pressure_string, Point::zero(), text_style)),
-            2,
-        )
-        .draw_placed(&mut display, rectangle)?;
+    vertical_layout(
+        expand(Bordered::new(center(clock_text), 0, 1, BinaryColor::On)),
+        1,
+    )
+    .append(
+        expand(center(Text::new(
+            pressure_string,
+            Point::zero(),
+            text_style,
+        ))),
+        2,
+    )
+    .draw_placed(&mut display, rectangle)?;
 
     let output_settings = OutputSettingsBuilder::new()
         .theme(BinaryColorTheme::LcdWhite)
