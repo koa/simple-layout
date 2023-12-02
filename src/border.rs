@@ -48,7 +48,7 @@ impl<L: Layoutable<C>, C: PixelColor, D: Decorator<C>> Layoutable<C> for Bordere
         &self,
         target: &mut impl DrawTarget<Color = C, Error = DrawError>,
         position: Rectangle,
-    ) -> Result<Point, DrawError> {
+    ) -> Result<(), DrawError> {
         let border = self.decorator.width();
         let Rectangle {
             top_left: Point { x, y },

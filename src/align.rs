@@ -9,31 +9,21 @@ use embedded_graphics::{
 use crate::layoutable::Layoutable;
 use crate::{ComponentSize, ValueRange};
 
-pub fn center<L: Layoutable<C>, C: PixelColor>(
-    l: L,
-) -> AlignLayout<L, C, CenteredAlignment, CenteredAlignment> {
-    AlignLayout::new(l)
+pub fn center<L: Layoutable<C>, C: PixelColor>(l: L) -> impl Layoutable<C> {
+    AlignLayout::<_, _, CenteredAlignment, CenteredAlignment>::new(l)
 }
 
-pub fn west<L: Layoutable<C>, C: PixelColor>(
-    l: L,
-) -> AlignLayout<L, C, StartAlignment, CenteredAlignment> {
-    AlignLayout::new(l)
+pub fn west<L: Layoutable<C>, C: PixelColor>(l: L) -> impl Layoutable<C> {
+    AlignLayout::<_, _, StartAlignment, CenteredAlignment>::new(l)
 }
-pub fn east<L: Layoutable<C>, C: PixelColor>(
-    l: L,
-) -> AlignLayout<L, C, EndAlignment, CenteredAlignment> {
-    AlignLayout::new(l)
+pub fn east<L: Layoutable<C>, C: PixelColor>(l: L) -> impl Layoutable<C> {
+    AlignLayout::<_, _, EndAlignment, CenteredAlignment>::new(l)
 }
-pub fn north<L: Layoutable<C>, C: PixelColor>(
-    l: L,
-) -> AlignLayout<L, C, CenteredAlignment, StartAlignment> {
-    AlignLayout::new(l)
+pub fn north<L: Layoutable<C>, C: PixelColor>(l: L) -> impl Layoutable<C> {
+    AlignLayout::<_, _, CenteredAlignment, StartAlignment>::new(l)
 }
-pub fn south<L: Layoutable<C>, C: PixelColor>(
-    l: L,
-) -> AlignLayout<L, C, CenteredAlignment, EndAlignment> {
-    AlignLayout::new(l)
+pub fn south<L: Layoutable<C>, C: PixelColor>(l: L) -> impl Layoutable<C> {
+    AlignLayout::<_, _, CenteredAlignment, EndAlignment>::new(l)
 }
 
 trait Alignment {
@@ -43,14 +33,14 @@ trait Alignment {
     ) -> (Saturating<i32>, Saturating<u32>);
 }
 
-pub struct AlignLayout<L: Layoutable<C>, C: PixelColor, VA: Alignment, HA: Alignment> {
+pub struct AlignLayout<L: Layoutable<C>, C: PixelColor, HA: Alignment, VA: Alignment> {
     layoutable: L,
     p1: PhantomData<C>,
     p2: PhantomData<VA>,
     p3: PhantomData<HA>,
 }
 
-impl<L: Layoutable<C>, C: PixelColor, VA: Alignment, HA: Alignment> AlignLayout<L, C, VA, HA> {
+impl<L: Layoutable<C>, C: PixelColor, HA: Alignment, VA: Alignment> AlignLayout<L, C, HA, VA> {
     fn new(layoutable: L) -> Self {
         Self {
             layoutable,
@@ -61,7 +51,7 @@ impl<L: Layoutable<C>, C: PixelColor, VA: Alignment, HA: Alignment> AlignLayout<
     }
 }
 
-impl<L: Layoutable<C>, C: PixelColor, VA: Alignment, HA: Alignment> AlignLayout<L, C, VA, HA> {
+impl<L: Layoutable<C>, C: PixelColor, HA: Alignment, VA: Alignment> AlignLayout<L, C, HA, VA> {
     fn place(component_size: ComponentSize, available_area: Rectangle) -> Rectangle {
         let Size {
             width: available_width,
@@ -78,8 +68,8 @@ impl<L: Layoutable<C>, C: PixelColor, VA: Alignment, HA: Alignment> AlignLayout<
     }
 }
 
-impl<L: Layoutable<C>, C: PixelColor, VA: Alignment, HA: Alignment> Layoutable<C>
-    for AlignLayout<L, C, VA, HA>
+impl<L: Layoutable<C>, C: PixelColor, HA: Alignment, VA: Alignment> Layoutable<C>
+    for AlignLayout<L, C, HA, VA>
 {
     #[inline]
     fn size(&self) -> ComponentSize {
@@ -91,7 +81,7 @@ impl<L: Layoutable<C>, C: PixelColor, VA: Alignment, HA: Alignment> Layoutable<C
         &self,
         target: &mut impl DrawTarget<Color = C, Error = DrawError>,
         position: Rectangle,
-    ) -> Result<Point, DrawError> {
+    ) -> Result<(), DrawError> {
         self.layoutable
             .draw_placed(target, Self::place(self.layoutable.size(), position))
     }

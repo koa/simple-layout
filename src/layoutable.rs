@@ -13,7 +13,7 @@ pub trait Layoutable<Color: PixelColor> {
         &self,
         target: &mut impl DrawTarget<Color = Color, Error = DrawError>,
         position: Rectangle,
-    ) -> Result<Point, DrawError>;
+    ) -> Result<(), DrawError>;
 }
 impl<'a, S: TextRenderer<Color = Color>, Color: PixelColor> Layoutable<Color> for Text<'a, S> {
     fn size(&self) -> ComponentSize {
@@ -38,7 +38,7 @@ impl<'a, S: TextRenderer<Color = Color>, Color: PixelColor> Layoutable<Color> fo
         &self,
         target: &mut impl DrawTarget<Color = Color, Error = DrawError>,
         position: Rectangle,
-    ) -> Result<Point, DrawError> {
+    ) -> Result<(), DrawError> {
         let offset = if let Some(first_line) = self.text.split('\n').next() {
             self.character_style
                 .measure_string(first_line, Point::default(), self.text_style.baseline)
@@ -48,6 +48,7 @@ impl<'a, S: TextRenderer<Color = Color>, Color: PixelColor> Layoutable<Color> fo
             Point::zero()
         };
         let offset = position.top_left - self.position - offset;
-        Drawable::draw(self, &mut OffsetDrawable::new(target, offset))
+        Drawable::draw(self, &mut OffsetDrawable::new(target, offset))?;
+        Ok(())
     }
 }

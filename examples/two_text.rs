@@ -11,7 +11,8 @@ use embedded_graphics_simulator::{
 };
 
 use simple_layout::prelude::{
-    bordered, center, expand, padding, vertical_layout, DashedLine, Layoutable, RoundedLine,
+    bordered, center, expand, horizontal_layout, north, padding, scale, south, vertical_layout,
+    DashedLine, Layoutable, RoundedLine,
 };
 
 fn main() -> Result<(), core::convert::Infallible> {
@@ -39,10 +40,21 @@ fn main() -> Result<(), core::convert::Infallible> {
         2,
     )
     .append(
-        center(bordered(
-            padding(Text::new("+", Point::zero(), text_style), -1, 0, -1, 0),
-            RoundedLine::new(BinaryColor::On),
-        )),
+        horizontal_layout(
+            bordered(
+                padding(Text::new("-", Point::zero(), text_style), -1, 0, -1, 0),
+                RoundedLine::new(BinaryColor::On),
+            ),
+            0,
+        )
+        .append(south(scale(1.0, BinaryColor::On)), 1)
+        .append(
+            bordered(
+                padding(Text::new("+", Point::zero(), text_style), -1, 0, -1, 0),
+                RoundedLine::new(BinaryColor::On),
+            ),
+            0,
+        ),
         0,
     )
     .draw_placed(&mut display, rectangle)?;

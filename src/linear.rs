@@ -122,7 +122,7 @@ pub trait LinearLayout<C: PixelColor, O: Orientation>: Sized {
         &self,
         target: &mut impl DrawTarget<Color = C, Error = DrawError>,
         places: &[Rectangle],
-    ) -> Result<Point, DrawError>;
+    ) -> Result<(), DrawError>;
 }
 
 #[derive(Default, Debug)]
@@ -144,7 +144,7 @@ impl<L: Layoutable<C>, C: PixelColor, O: Orientation> Layoutable<C>
         &self,
         target: &mut impl DrawTarget<Color = C, Error = DrawError>,
         position: Rectangle,
-    ) -> Result<Point, DrawError> {
+    ) -> Result<(), DrawError> {
         self.layout.draw_placed(target, position)
     }
 }
@@ -172,7 +172,7 @@ impl<L: Layoutable<C>, C: PixelColor, O: Orientation> LinearLayout<C, O>
         &self,
         target: &mut impl DrawTarget<Color = C, Error = DrawError>,
         places: &[Rectangle],
-    ) -> Result<Point, DrawError> {
+    ) -> Result<(), DrawError> {
         self.layout.draw_placed(target, places[0])
     }
 }
@@ -233,7 +233,7 @@ impl<C: PixelColor, O: Orientation, LL: LinearLayout<C, O>> Layoutable<C>
         &self,
         target: &mut impl DrawTarget<Color = C, Error = DrawError>,
         position: Rectangle,
-    ) -> Result<Point, DrawError> {
+    ) -> Result<(), DrawError> {
         let (along_target, cross_target) = O::split_size(position.size);
         let (mut along_offset, cross_offset) = O::split_point(position.top_left);
 
@@ -417,7 +417,7 @@ impl<LL: LinearLayout<C, O>, L: Layoutable<C>, C: PixelColor, O: Orientation> Li
         &self,
         target: &mut impl DrawTarget<Color = C, Error = DrawError>,
         places: &[Rectangle],
-    ) -> Result<Point, DrawError> {
+    ) -> Result<(), DrawError> {
         let idx = Self::len() - 1;
         self.base_layout
             .draw_placed_components(target, &places[0..idx])?;

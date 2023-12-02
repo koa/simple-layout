@@ -48,7 +48,7 @@ impl<C: PixelColor, L: Layoutable<C>> Layoutable<C> for Padding<C, L> {
         &self,
         target: &mut impl DrawTarget<Color = C, Error = DrawError>,
         position: Rectangle,
-    ) -> Result<Point, DrawError> {
+    ) -> Result<(), DrawError> {
         let Rectangle {
             top_left: Point { x, y },
             size: Size { width, height },

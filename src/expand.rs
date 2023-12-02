@@ -41,7 +41,7 @@ impl<L: Layoutable<C>, C: PixelColor, E: Expander> Layoutable<C> for ExpandLayou
         &self,
         target: &mut impl DrawTarget<Color = C, Error = DrawError>,
         position: Rectangle,
-    ) -> Result<Point, DrawError> {
+    ) -> Result<(), DrawError> {
         self.layoutable.draw_placed(target, position)
     }
 }

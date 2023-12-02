@@ -9,15 +9,17 @@ mod expand;
 mod layoutable;
 mod linear;
 mod padding;
+mod scale;
 
 pub mod prelude {
     pub use crate::{
-        align::center,
+        align::{center, east, north, south, west},
         border::{bordered, DashedLine, RoundedLine},
         expand::{expand, expand_horizontal, expand_vertical},
         layoutable::Layoutable,
         linear::{horizontal_layout, vertical_layout},
         padding::padding,
+        scale::scale,
     };
 }
 
@@ -106,12 +108,12 @@ impl<V: AddAssign> AddAssign for ValueRange<V> {
     }
 }
 
-impl<V: Clone> ValueRange<V> {
+impl<V: Clone> ValueRange<Saturating<V>> {
     fn fixed(value: V) -> Self {
         Self {
-            preferred_value: value.clone(),
-            min_value: value.clone(),
-            max_value: value,
+            preferred_value: Saturating(value.clone()),
+            min_value: Saturating(value.clone()),
+            max_value: Saturating(value),
         }
     }
 }
@@ -129,8 +131,8 @@ impl ValueRange<Saturating<u32>> {
 impl ComponentSize {
     pub fn fixed_size(width: u32, height: u32) -> ComponentSize {
         ComponentSize {
-            width: ValueRange::fixed(Saturating(width)),
-            height: ValueRange::fixed(Saturating(height)),
+            width: ValueRange::fixed(width),
+            height: ValueRange::fixed(height),
         }
     }
     pub fn new(
