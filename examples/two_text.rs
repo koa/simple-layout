@@ -11,7 +11,7 @@ use embedded_graphics_simulator::{
 };
 
 use simple_layout::prelude::{
-    bordered, center, expand, horizontal_layout, north, padding, scale, south, vertical_layout,
+    bordered, center, expand, horizontal_layout, padding, scale, south, vertical_layout,
     DashedLine, Layoutable, RoundedLine,
 };
 

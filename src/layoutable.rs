@@ -1,5 +1,7 @@
 use embedded_graphics::{
-    prelude::{DrawTarget, PixelColor, Point},
+    geometry::Size,
+    image::Image,
+    prelude::{Dimensions, DrawTarget, ImageDrawable, PixelColor, Point},
     primitives::Rectangle,
     text::{renderer::TextRenderer, Text},
     Drawable,
@@ -48,7 +50,29 @@ impl<'a, S: TextRenderer<Color = Color>, Color: PixelColor> Layoutable<Color> fo
             Point::zero()
         };
         let offset = position.top_left - self.position - offset;
-        Drawable::draw(self, &mut OffsetDrawable::new(target, offset))?;
+        self.draw(&mut OffsetDrawable::new(target, offset))?;
+        //Drawable::draw(self, &mut OffsetDrawable::new(target, offset))?;
+        Ok(())
+    }
+}
+
+impl<'a, C: PixelColor, T: ImageDrawable<Color = C>> Layoutable<C> for Image<'a, T> {
+    fn size(&self) -> ComponentSize {
+        let Rectangle {
+            size: Size { width, height },
+            ..
+        } = self.bounding_box();
+        ComponentSize::fixed_size(width, height)
+    }
+
+    fn draw_placed<DrawError>(
+        &self,
+        target: &mut impl DrawTarget<Color = C, Error = DrawError>,
+        position: Rectangle,
+    ) -> Result<(), DrawError> {
+        let Rectangle { top_left, .. } = self.bounding_box();
+        let offset = position.top_left - top_left;
+        self.draw(&mut OffsetDrawable::new(target, offset))?;
         Ok(())
     }
 }
