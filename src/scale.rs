@@ -41,7 +41,8 @@ impl<C: PixelColor> Layoutable<C> for Scale<C> {
         let y = position.top_left.y;
         let total_dot_count = (width - 5) / 3;
         let x_offset = (width - total_dot_count * 3 - 4) / 2;
-        let enabled_dot_count = (self.value * total_dot_count as f32).round() as u32;
+        let enabled_dot_count =
+            ((self.value * total_dot_count as f32).round() as u32).min(total_dot_count);
 
         let pixels = [1, total_dot_count * 3 + 3]
             .into_iter()

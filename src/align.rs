@@ -33,7 +33,7 @@ trait Alignment {
     ) -> (Saturating<i32>, Saturating<u32>);
 }
 
-pub struct AlignLayout<L: Layoutable<C>, C: PixelColor, HA: Alignment, VA: Alignment> {
+struct AlignLayout<L: Layoutable<C>, C: PixelColor, HA: Alignment, VA: Alignment> {
     layoutable: L,
     p1: PhantomData<C>,
     p2: PhantomData<VA>,

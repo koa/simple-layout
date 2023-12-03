@@ -1,7 +1,7 @@
 use std::marker::PhantomData;
 
 use embedded_graphics::{
-    prelude::{DrawTarget, PixelColor, Point},
+    prelude::{DrawTarget, PixelColor},
     primitives::Rectangle,
 };
 

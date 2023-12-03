@@ -9,6 +9,7 @@ mod expand;
 mod layoutable;
 mod linear;
 mod padding;
+mod placement;
 mod scale;
 
 pub mod prelude {
@@ -19,6 +20,7 @@ pub mod prelude {
         layoutable::Layoutable,
         linear::{horizontal_layout, vertical_layout},
         padding::padding,
+        placement::{callback_placement, optional_placement},
         scale::scale,
     };
 }
