@@ -17,7 +17,7 @@ pub mod prelude {
         align::{center, east, north, south, west},
         border::{bordered, DashedLine, RoundedLine},
         expand::{expand, expand_horizontal, expand_vertical},
-        layoutable::Layoutable,
+        layoutable::{owned_text, Layoutable},
         linear::{horizontal_layout, vertical_layout},
         padding::padding,
         placement::{callback_placement, optional_placement},

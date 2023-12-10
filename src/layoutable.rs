@@ -1,3 +1,6 @@
+use std::marker::PhantomData;
+
+use embedded_graphics::text::{TextStyle, TextStyleBuilder};
 use embedded_graphics::{
     geometry::Size,
     image::Image,
@@ -17,6 +20,51 @@ pub trait Layoutable<Color: PixelColor> {
         position: Rectangle,
     ) -> Result<(), DrawError>;
 }
+
+pub fn owned_text<S: TextRenderer<Color = C> + Copy, C: PixelColor, StrValue: Into<Box<str>>>(
+    text: StrValue,
+    character_style: S,
+) -> impl Layoutable<C> {
+    OwnedText {
+        text: text.into(),
+        character_style,
+        text_style: TextStyleBuilder::new().build(),
+        p: Default::default(),
+    }
+}
+struct OwnedText<S, C: PixelColor> {
+    text: Box<str>,
+    character_style: S,
+    text_style: TextStyle,
+    p: PhantomData<C>,
+}
+
+impl<S: TextRenderer<Color = C> + Copy, C: PixelColor> Layoutable<C> for OwnedText<S, C> {
+    fn size(&self) -> ComponentSize {
+        Text::with_text_style(
+            &self.text,
+            Point::zero(),
+            self.character_style,
+            self.text_style,
+        )
+        .size()
+    }
+
+    fn draw_placed<DrawError>(
+        &self,
+        target: &mut impl DrawTarget<Color = C, Error = DrawError>,
+        position: Rectangle,
+    ) -> Result<(), DrawError> {
+        Text::with_text_style(
+            &self.text,
+            Point::zero(),
+            self.character_style,
+            self.text_style,
+        )
+        .draw_placed(target, position)
+    }
+}
+
 impl<'a, S: TextRenderer<Color = Color>, Color: PixelColor> Layoutable<Color> for Text<'a, S> {
     fn size(&self) -> ComponentSize {
         let mut total_height = 0;
@@ -51,7 +99,6 @@ impl<'a, S: TextRenderer<Color = Color>, Color: PixelColor> Layoutable<Color> fo
         };
         let offset = position.top_left - self.position - offset;
         self.draw(&mut OffsetDrawable::new(target, offset))?;
-        //Drawable::draw(self, &mut OffsetDrawable::new(target, offset))?;
         Ok(())
     }
 }
@@ -74,5 +121,25 @@ impl<'a, C: PixelColor, T: ImageDrawable<Color = C>> Layoutable<C> for Image<'a,
         let offset = position.top_left - top_left;
         self.draw(&mut OffsetDrawable::new(target, offset))?;
         Ok(())
+    }
+}
+
+impl<C: PixelColor, L: Layoutable<C>> Layoutable<C> for Option<L> {
+    fn size(&self) -> ComponentSize {
+        match self {
+            None => ComponentSize::default(),
+            Some(l) => l.size(),
+        }
+    }
+
+    fn draw_placed<DrawError>(
+        &self,
+        target: &mut impl DrawTarget<Color = C, Error = DrawError>,
+        position: Rectangle,
+    ) -> Result<(), DrawError> {
+        match self {
+            None => Ok(()),
+            Some(l) => l.draw_placed(target, position),
+        }
     }
 }
