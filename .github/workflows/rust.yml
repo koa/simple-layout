@@ -16,6 +16,13 @@ jobs:
 
     steps:
     - uses: actions/checkout@v3
+    - name: Cache Target
+      uses: actions/cache@v3
+      with:
+        path: |
+          target/
+
+        key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}-${{ matrix.rust }}
     - name: Build
       run: cargo build --verbose
     - name: Run tests

@@ -1,25 +1,34 @@
-use std::thread;
-use std::time::Duration;
+#[cfg(feature = "simulate-example")]
+use std::{thread, time::Duration};
 
+#[cfg(feature = "simulate-example")]
 use chrono::Local;
-use embedded_graphics::prelude::DrawTarget;
+#[cfg(feature = "simulate-example")]
 use embedded_graphics::{
     geometry::Dimensions,
     mono_font::{iso_8859_1::FONT_6X9, MonoTextStyle},
     pixelcolor::BinaryColor,
-    prelude::{Point, Size},
+    prelude::{DrawTarget, Point, Size},
     text::Text,
 };
+#[cfg(feature = "simulate-example")]
 use embedded_graphics_simulator::{
     BinaryColorTheme, OutputSettingsBuilder, SimulatorDisplay, SimulatorEvent, Window,
 };
+#[cfg(feature = "simulate-example")]
 use env_logger::Env;
 
+#[cfg(feature = "simulate-example")]
 use simple_layout::prelude::{
     bordered, center, expand, horizontal_layout, optional_placement, padding, scale, south,
     vertical_layout, DashedLine, Layoutable, RoundedLine,
 };
 
+#[cfg(not(feature = "simulate-example"))]
+fn main() {
+    // dummy
+}
+#[cfg(feature = "simulate-example")]
 fn main() -> Result<(), core::convert::Infallible> {
     env_logger::init_from_env(Env::default().filter_or("LOG_LEVEL", "info"));
 
