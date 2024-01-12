@@ -27,6 +27,7 @@ use simple_layout::prelude::{
 #[cfg(not(feature = "simulate-example"))]
 fn main() {
     // dummy
+    println!("Enable feature simulate-example for a test");
 }
 #[cfg(feature = "simulate-example")]
 fn main() -> Result<(), core::convert::Infallible> {

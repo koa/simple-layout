@@ -1,26 +1,27 @@
-use std::marker::PhantomData;
-
-use embedded_graphics::draw_target::DrawTarget;
-use embedded_graphics::geometry::Point;
-use embedded_graphics::pixelcolor::PixelColor;
-use embedded_graphics::primitives::Rectangle;
-use embedded_graphics::Pixel;
+use embedded_graphics::{
+    draw_target::DrawTarget, geometry::Point, pixelcolor::PixelColor, primitives::Rectangle, Pixel,
+};
 
 use crate::layoutable::Layoutable;
 use crate::{ComponentSize, ValueRange};
 
+///
+/// Draws a simple scale consisting of 2x2 Dots onto a given space.
+///
+/// # Arguments
+///
+/// * `value`: value to be represented on the scale (0.0-1.0)
+/// * `color`: color of the dots
+///
+/// returns: impl Layoutable<C>+Sized
+///
 pub fn scale<C: PixelColor>(value: f32, color: C) -> impl Layoutable<C> {
-    Scale {
-        value,
-        color,
-        p: Default::default(),
-    }
+    Scale { value, color }
 }
 
 struct Scale<C: PixelColor> {
     value: f32,
     color: C,
-    p: PhantomData<C>,
 }
 
 impl<C: PixelColor> Layoutable<C> for Scale<C> {

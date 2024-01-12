@@ -1,19 +1,34 @@
 use std::marker::PhantomData;
 
-use embedded_graphics::text::{TextStyle, TextStyleBuilder};
 use embedded_graphics::{
     geometry::Size,
     image::Image,
     prelude::{Dimensions, DrawTarget, ImageDrawable, PixelColor, Point},
     primitives::Rectangle,
-    text::{renderer::TextRenderer, Text},
+    text::{renderer::TextRenderer, Text, TextStyle, TextStyleBuilder},
     Drawable,
 };
 
 use crate::{draw::OffsetDrawable, ComponentSize};
 
+///
+/// Defines any Layoutable element (anything that can be layouted)
+///
 pub trait Layoutable<Color: PixelColor> {
+    ///
+    /// Returns size constraints of that element
+    /// returns ComponentSize preferred placement constraints of this element
     fn size(&self) -> ComponentSize;
+    ///
+    /// Draws this element onto a defined region onto a target
+    ///
+    /// # Arguments
+    ///
+    /// * `target`: Target where this element should be drawn
+    /// * `position`: place to draw this element onto
+    ///
+    /// returns: Result<(), DrawError>
+    ///
     fn draw_placed<DrawError>(
         &self,
         target: &mut impl DrawTarget<Color = Color, Error = DrawError>,
@@ -21,6 +36,31 @@ pub trait Layoutable<Color: PixelColor> {
     ) -> Result<(), DrawError>;
 }
 
+///
+/// Generates a Layoutable text around a owned (possible generated) string
+///
+/// # Arguments
+///
+/// * `text`: String to render
+/// * `character_style`: Font and style of the text
+///
+/// returns: impl Layoutable<C>+Sized
+///
+/// # Examples
+///
+/// ```
+/// use embedded_graphics::{
+///     mono_font::{
+///         iso_8859_1::FONT_6X12,
+///         MonoTextStyle
+///     },
+///     pixelcolor::BinaryColor
+/// };
+/// use simple_layout::prelude::owned_text;
+/// let temperature=21.3;
+/// let temperature_layout = owned_text(format!("{temperature:.1}°C"), MonoTextStyle::new(&FONT_6X12, BinaryColor::On));
+///
+/// ```
 pub fn owned_text<S: TextRenderer<Color = C> + Copy, C: PixelColor, StrValue: Into<Box<str>>>(
     text: StrValue,
     character_style: S,
@@ -65,6 +105,9 @@ impl<S: TextRenderer<Color = C> + Copy, C: PixelColor> Layoutable<C> for OwnedTe
     }
 }
 
+///
+/// Render Text as Layoutable
+///
 impl<'a, S: TextRenderer<Color = Color>, Color: PixelColor> Layoutable<Color> for Text<'a, S> {
     fn size(&self) -> ComponentSize {
         let mut total_height = 0;
@@ -103,6 +146,9 @@ impl<'a, S: TextRenderer<Color = Color>, Color: PixelColor> Layoutable<Color> fo
     }
 }
 
+///
+/// Render Image as Layoutable
+///
 impl<'a, C: PixelColor, T: ImageDrawable<Color = C>> Layoutable<C> for Image<'a, T> {
     fn size(&self) -> ComponentSize {
         let Rectangle {
@@ -124,6 +170,9 @@ impl<'a, C: PixelColor, T: ImageDrawable<Color = C>> Layoutable<C> for Image<'a,
     }
 }
 
+///
+/// Render a `Optional<impl Layoutable> as Layoutable`
+///
 impl<C: PixelColor, L: Layoutable<C>> Layoutable<C> for Option<L> {
     fn size(&self) -> ComponentSize {
         match self {

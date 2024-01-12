@@ -7,6 +7,26 @@ use embedded_graphics::{
 
 use crate::{layoutable::Layoutable, ComponentSize};
 
+///
+/// remove the maximum size constraints (set width and height to u32::MAX)
+///
+/// # Arguments
+///
+/// * `input`: element
+///
+/// returns: impl Layoutable<C>+Sized
+///
+/// # Examples
+///
+/// let center a text within the available space
+/// ```
+/// use embedded_graphics::mono_font::iso_8859_1::FONT_10X20;
+/// use embedded_graphics::mono_font::MonoTextStyle;
+/// use embedded_graphics::pixelcolor::BinaryColor;
+/// use simple_layout::prelude::{center, expand, owned_text};
+/// let value=42;
+/// let centered_number = expand(center(owned_text(format!("{value:.1}"), MonoTextStyle::new(&FONT_10X20, BinaryColor::On))));
+/// ```
 pub fn expand<L: Layoutable<C>, C: PixelColor>(input: L) -> impl Layoutable<C> {
     ExpandLayoutable {
         layoutable: input,
@@ -14,6 +34,7 @@ pub fn expand<L: Layoutable<C>, C: PixelColor>(input: L) -> impl Layoutable<C> {
         p1: PhantomData::<AreaExpander>,
     }
 }
+/// Let the containing element expand horizontally
 pub fn expand_horizontal<L: Layoutable<C>, C: PixelColor>(input: L) -> impl Layoutable<C> {
     ExpandLayoutable {
         layoutable: input,
@@ -21,6 +42,7 @@ pub fn expand_horizontal<L: Layoutable<C>, C: PixelColor>(input: L) -> impl Layo
         p1: PhantomData::<HorizontalExpander>,
     }
 }
+/// Let the containing element expand vertically
 pub fn expand_vertical<L: Layoutable<C>, C: PixelColor>(input: L) -> impl Layoutable<C> {
     ExpandLayoutable {
         layoutable: input,

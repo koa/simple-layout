@@ -25,6 +25,9 @@ pub mod prelude {
     };
 }
 
+///
+/// Defined preferred size of a Layoutable
+///
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug, Default)]
 pub struct ComponentSize {
     width: ValueRange<Saturating<u32>>,
@@ -131,12 +134,41 @@ impl ValueRange<Saturating<u32>> {
 }
 
 impl ComponentSize {
+    ///
+    /// Create a fixed sized constraint
+    ///
+    /// # Arguments
+    ///
+    /// * `width`: fixed width
+    /// * `height`: fixed height
+    ///
+    /// returns: ComponentSize
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use simple_layout::ComponentSize;
+    /// //defined  a 8x8 fixed size
+    /// let fixed = ComponentSize::fixed_size(8,8);
+    /// ```
     pub fn fixed_size(width: u32, height: u32) -> ComponentSize {
         ComponentSize {
             width: ValueRange::fixed(width),
             height: ValueRange::fixed(height),
         }
     }
+    ///
+    /// Defines a fully customizeable component size
+    ///
+    /// # Arguments
+    ///
+    /// * `preferred_width`: optimal width of the component
+    /// * `preferred_height`: optimal height of the component
+    /// * `width_range`: minimum and maximum width, allows the layout algorithm to arrange and place that element
+    /// * `height_range`: minimum and maximum height, allows the layout algorithm to arrange and place that element
+    ///
+    /// returns: ComponentSize
+    ///
     pub fn new(
         preferred_width: u32,
         preferred_height: u32,

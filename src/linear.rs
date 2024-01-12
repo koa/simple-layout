@@ -184,9 +184,19 @@ pub struct LayoutableLinearLayout<C: PixelColor, O: Orientation, LL: LinearLayou
 );
 
 impl<C: PixelColor, O: Orientation, LL: LinearLayout<C, O>> LayoutableLinearLayout<C, O, LL> {
+    ///
+    /// append an additional element to the current linear stack
+    ///
+    /// # Arguments
+    ///
+    /// * `element`: new element
+    /// * `weight`: weight of the element
+    ///
+    /// returns: LayoutableLinearLayout<C, O, ChainingLinearLayout<LL, L, C, O>>
+    ///
     pub fn append<L>(
         self,
-        l: L,
+        element: L,
         weight: u32,
     ) -> LayoutableLinearLayout<C, O, ChainingLinearLayout<LL, L, C, O>>
     where
@@ -195,7 +205,7 @@ impl<C: PixelColor, O: Orientation, LL: LinearLayout<C, O>> LayoutableLinearLayo
         LayoutableLinearLayout(
             ChainingLinearLayout {
                 base_layout: self.0,
-                layoutable: l,
+                layoutable: element,
                 weight,
                 p: Default::default(),
                 o: Default::default(),
@@ -425,14 +435,63 @@ impl<LL: LinearLayout<C, O>, L: Layoutable<C>, C: PixelColor, O: Orientation> Li
     }
 }
 
+///
+/// Stack multiple layout elements vertically
+///
+/// # Arguments
+///
+/// * `first_child`: First layout element to stack
+/// * `first_child_weight`: Weight of this element when expansion or shrinking is needed to fit elements vertically
+///
+/// returns: LayoutableLinearLayout<C, Vertical, SingleLinearLayout<L, C, Vertical>>
+///
+/// # Examples
+///
+/// ```
+/// use embedded_graphics::mono_font::iso_8859_1::FONT_6X12;
+/// use embedded_graphics::mono_font::MonoTextStyle;
+/// use embedded_graphics::pixelcolor::BinaryColor;
+/// use embedded_graphics::prelude::Point;
+/// use embedded_graphics::text::Text;
+/// use simple_layout::prelude::{bordered, center, expand, horizontal_layout, optional_placement, owned_text, padding, RoundedLine, scale, vertical_layout};
+/// const TEXT_STYLE: MonoTextStyle<BinaryColor> = MonoTextStyle::new(&FONT_6X12, BinaryColor::On);
+/// let mut minus_button_placement=None;
+/// let mut plus_button_placement=None;
+/// let value = 0.7;
+/// let data_visualization = vertical_layout(expand(center(owned_text(format!("{value:.1}"), TEXT_STYLE))),1,)
+///                 .append(scale(value, BinaryColor::On), 0);
+/// let numbered_scale = expand(center(
+///         horizontal_layout(
+///             center(optional_placement(
+///                 &mut minus_button_placement,
+///                 bordered(
+///                     padding(Text::new("-", Point::zero(), TEXT_STYLE), -2, 1, -1, 1),
+///                     RoundedLine::new(BinaryColor::On),
+///                 ),
+///             )),
+///             0,
+///         )
+///         .append(data_visualization, 1)
+///         .append(
+///             center(optional_placement(
+///                 &mut plus_button_placement,
+///                 bordered(
+///                     padding(Text::new("+", Point::zero(), TEXT_STYLE), -2, 1, -1, 1),
+///                     RoundedLine::new(BinaryColor::On),
+///                 ),
+///             )),
+///             0,
+///         ),
+///     ));
+/// ```
 pub fn vertical_layout<L: Layoutable<C>, C: PixelColor>(
-    l: L,
-    w: u32,
+    first_child: L,
+    first_child_weight: u32,
 ) -> LayoutableLinearLayout<C, Vertical, SingleLinearLayout<L, C, Vertical>> {
     LayoutableLinearLayout(
         SingleLinearLayout {
-            layout: l,
-            weight: w,
+            layout: first_child,
+            weight: first_child_weight,
             p1: PhantomData,
             p2: PhantomData,
         },
@@ -441,14 +500,23 @@ pub fn vertical_layout<L: Layoutable<C>, C: PixelColor>(
     )
 }
 
+///
+///
+/// # Arguments
+///
+/// * `first_child`: First layout element to stack
+/// * `first_child_weight`: Weight of this element when expansion or shrinking is needed to fit elements vertically
+///
+/// returns: LayoutableLinearLayout<C, Horizontal, SingleLinearLayout<L, C, Horizontal>>
+///
 pub fn horizontal_layout<L: Layoutable<C>, C: PixelColor>(
-    l: L,
-    w: u32,
+    first_child: L,
+    first_child_weight: u32,
 ) -> LayoutableLinearLayout<C, Horizontal, SingleLinearLayout<L, C, Horizontal>> {
     LayoutableLinearLayout(
         SingleLinearLayout {
-            layout: l,
-            weight: w,
+            layout: first_child,
+            weight: first_child_weight,
             p1: PhantomData,
             p2: PhantomData,
         },

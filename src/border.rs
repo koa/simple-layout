@@ -23,6 +23,29 @@ struct Bordered<L: Layoutable<C>, C: PixelColor, D: Decorator<C>> {
     p: PhantomData<C>,
 }
 
+///
+/// Generate a border around a layouted element
+///
+/// # Arguments
+///
+/// * `layoutable`: element within the border
+/// * `decorator`: definition of the decorator around that element
+///
+/// returns: impl Layoutable<C>+Sized
+///
+/// # Examples
+///
+/// ```
+/// use embedded_graphics::mono_font::iso_8859_1::FONT_6X12;
+/// use embedded_graphics::mono_font::MonoTextStyle;
+/// use embedded_graphics::pixelcolor::BinaryColor;
+/// use simple_layout::prelude::{bordered, center, DashedLine, owned_text};
+/// let temperature = 20.7;
+/// let element = bordered(
+///                 center(owned_text(format!("{temperature:.1}°C"), MonoTextStyle::new(&FONT_6X12, BinaryColor::On))),
+///                 DashedLine::new(2, 2, BinaryColor::On),
+///             );
+/// ```
 pub fn bordered<L: Layoutable<C>, C: PixelColor, D: Decorator<C>>(
     layoutable: L,
     decorator: D,
@@ -75,6 +98,24 @@ pub struct DashedLine<C: PixelColor> {
 }
 
 impl<C: PixelColor> DashedLine<C> {
+    /// Create a new dashed line
+    ///
+    /// # Arguments
+    ///
+    /// * `dot_count`: count of dots on the pattern to draw
+    /// * `gap_count`: count of pixels to miss between the strokes
+    /// * `color`: color to paint the dots
+    ///
+    /// returns: DashedLine<C>
+    ///
+    /// # Examples
+    ///
+    /// Draw 2 dots, then skip 2 dots
+    /// ```
+    /// use embedded_graphics::pixelcolor::BinaryColor;
+    /// use simple_layout::prelude::DashedLine;
+    /// DashedLine::new(2, 2, BinaryColor::On);
+    /// ```
     pub fn new(dot_count: u32, gap_count: u32, color: C) -> Self {
         Self {
             dot_count,
@@ -125,6 +166,30 @@ pub struct RoundedLine<C: PixelColor> {
 }
 
 impl<C: PixelColor> RoundedLine<C> {
+    ///
+    /// Create a pattern of a rounded line around a element
+    ///
+    /// # Arguments
+    ///
+    /// * `color`: Color of the line
+    ///
+    /// returns: RoundedLine<C>
+    ///
+    /// # Examples
+    ///
+    /// defines a plus button by rendering a '+' and draw a rounded line around
+    /// ```
+    /// use embedded_graphics::mono_font::iso_8859_1::FONT_6X12;
+    /// use embedded_graphics::mono_font::MonoTextStyle;
+    /// use embedded_graphics::pixelcolor::BinaryColor;
+    /// use embedded_graphics::prelude::Point;
+    /// use embedded_graphics::text::Text;
+    /// use simple_layout::prelude::{bordered, padding, RoundedLine};
+    /// let plus_button = bordered(
+    ///                     padding(Text::new("+", Point::zero(), MonoTextStyle::new(&FONT_6X12, BinaryColor::On)), -2, 1, -1, 1),
+    ///                     RoundedLine::new(BinaryColor::On),
+    ///                 );
+    /// ```
     pub fn new(color: C) -> Self {
         Self { color }
     }

@@ -645,8 +645,8 @@ dependencies = [
 ]
 
 [[package]]
-name = "simple_layout"
-version = "0.1.0"
+name = "simple-layout"
+version = "0.0.1-SNAPSHOT"
 dependencies = [
  "chrono",
  "embedded-graphics",

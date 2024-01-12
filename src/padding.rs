@@ -9,6 +9,30 @@ use embedded_graphics::primitives::Rectangle;
 use crate::prelude::Layoutable;
 use crate::ComponentSize;
 
+///
+/// Adjust placement of a component by adding/removing additional offsets
+///
+/// # Arguments
+///
+/// * `layoutable`: element to place
+/// * `top`: adjustment to the top
+/// * `right`: adjustment on the right
+/// * `bottom`: adjustment to the bottom
+/// * `left`: adjustment on the left
+///
+/// returns: impl Layoutable<C>+Sized
+///
+/// # Examples
+///
+/// ```
+/// use embedded_graphics::geometry::Point;
+/// use embedded_graphics::mono_font::iso_8859_1::FONT_6X12;
+/// use embedded_graphics::mono_font::MonoTextStyle;
+/// use embedded_graphics::pixelcolor::BinaryColor;
+/// use embedded_graphics::text::Text;
+/// use simple_layout::prelude::padding;
+/// let adjusted_text = padding(Text::new("-", Point::zero(), MonoTextStyle::new(&FONT_6X12, BinaryColor::On)), -2, 1, -1, 1);
+/// ```
 pub fn padding<C: PixelColor, L: Layoutable<C>>(
     layoutable: L,
     top: i32,

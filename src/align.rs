@@ -9,19 +9,50 @@ use embedded_graphics::{
 use crate::layoutable::Layoutable;
 use crate::{ComponentSize, ValueRange};
 
+///
+/// Arrange a layoutable into the center of its available space
+///
+/// # Arguments
+///
+/// * `l`: element to place
+///
+/// returns: impl Layoutable<C>+Sized
+///
+/// # Examples
+///
+/// ```
+/// use embedded_graphics::mono_font::iso_8859_1::FONT_6X12;
+/// use embedded_graphics::mono_font::MonoTextStyle;
+/// use embedded_graphics::pixelcolor::BinaryColor;
+/// use simple_layout::prelude::{center, owned_text};
+/// let temperature=20.3;
+/// let element = center(owned_text(format!("{temperature:.1}°C"), MonoTextStyle::new(&FONT_6X12, BinaryColor::On)));
+/// ```
 pub fn center<L: Layoutable<C>, C: PixelColor>(l: L) -> impl Layoutable<C> {
     AlignLayout::<_, _, CenteredAlignment, CenteredAlignment>::new(l)
 }
 
+///
+/// Arrange a layoutable into the left middle of its available space
+///
 pub fn west<L: Layoutable<C>, C: PixelColor>(l: L) -> impl Layoutable<C> {
     AlignLayout::<_, _, StartAlignment, CenteredAlignment>::new(l)
 }
+///
+/// Arrange a layoutable into the right middle of its available space
+///
 pub fn east<L: Layoutable<C>, C: PixelColor>(l: L) -> impl Layoutable<C> {
     AlignLayout::<_, _, EndAlignment, CenteredAlignment>::new(l)
 }
+///
+/// Arrange a layoutable into the top center of its available space
+///
 pub fn north<L: Layoutable<C>, C: PixelColor>(l: L) -> impl Layoutable<C> {
     AlignLayout::<_, _, CenteredAlignment, StartAlignment>::new(l)
 }
+///
+/// Arrange a layoutable into the bottom center of its available space
+///
 pub fn south<L: Layoutable<C>, C: PixelColor>(l: L) -> impl Layoutable<C> {
     AlignLayout::<_, _, CenteredAlignment, EndAlignment>::new(l)
 }
@@ -49,9 +80,6 @@ impl<L: Layoutable<C>, C: PixelColor, HA: Alignment, VA: Alignment> AlignLayout<
             p3: PhantomData,
         }
     }
-}
-
-impl<L: Layoutable<C>, C: PixelColor, HA: Alignment, VA: Alignment> AlignLayout<L, C, HA, VA> {
     fn place(component_size: ComponentSize, available_area: Rectangle) -> Rectangle {
         let Size {
             width: available_width,
