@@ -1,8 +1,9 @@
 [package]
 name = "simple-layout"
-version = "0.0.1-SNAPSHOT"
+version = "0.0.0-SNAPSHOT"
 edition = "2021"
 license = "MIT"
+description = "Simple layout library for embedded-graphics"
 repository = "https://github.com/koa/simple-layout"
 categories = ["gui", "graphics"]
 keywords = ["layout", "linear-layout"]
