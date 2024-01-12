@@ -6,7 +6,7 @@ cargo install cargo-release cargo-get set-cargo-version
 
 cargo-release release "${RELEASE_TYPE=patch}" -x --no-confirm || exit 1
 
-cargo release version patch -x --no-confirm --no-push
+cargo release version patch -x --no-confirm
 VERSION=$(cargo get package.version)
 set-cargo-version ./Cargo.toml "${VERSION}"-SNAPSHOT
 git add ./Cargo.toml Cargo.lock
